@@ -25,5 +25,20 @@ $(function() {
 	}).addEdge({
 		endpointA: 2,
 		endpointB: 3
-	}).go()
+	})
+
+	for (var x = 30 ; x < 40; x = x + 1) {
+		graph.addNode({
+			id: x,
+			x: 200,
+			y: 200,
+			label: 'Node #' + x
+		}).addEdge({
+			endpointA: 1,
+			endpointB: x
+		})
+	}
+
+	graph.go()
+
 })
