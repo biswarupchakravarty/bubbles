@@ -25,5 +25,5 @@ $(function() {
 	}).addEdge({
 		endpointA: 2,
 		endpointB: 3
-	}).render()
+	}).go()
 })

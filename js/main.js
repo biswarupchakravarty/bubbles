@@ -49,18 +49,18 @@ var graph = new (function() {
 			_x = e.screenX
 			_y = e.screenY
 		}).mousewheel(function(e, delta) {
-			var vBHo = viewBoxHeight;
-			var vBWo = viewBoxWidth;
+			var vBHo = viewBoxHeight
+			var vBWo = viewBoxWidth
 			if (delta < 0) {
-				viewBoxWidth *= 0.95;
-				viewBoxHeight*= 0.95;
+				viewBoxWidth *= 0.95
+				viewBoxHeight*= 0.95
 			}
 			else {
-				viewBoxWidth *= 1.05;
-				viewBoxHeight *= 1.05;
+				viewBoxWidth *= 1.05
+				viewBoxHeight *= 1.05
 			}
-			viewBox.X -= (viewBoxWidth - vBWo) / 2;
-			viewBox.Y -= (viewBoxHeight - vBHo) / 2;
+			viewBox.X -= (viewBoxWidth - vBWo) / 2
+			viewBox.Y -= (viewBoxHeight - vBHo) / 2
 			world.setViewBox(viewBox.X,viewBox.Y,viewBoxWidth,viewBoxHeight)
 			zoomX = options.width / viewBoxWidth
 			zoomY = options.height / viewBoxHeight
@@ -75,7 +75,7 @@ var graph = new (function() {
 		return this
 	}
 
-	this.renderNode = function(node) {
+	var renderNode = function(node) {
 		var c = world.circle(node.x, node.y, config.nodeRadius)
 			.attr({
 				fill: config.nodeColor,
@@ -100,6 +100,14 @@ var graph = new (function() {
 		    })
 		    this.data('label').remove()
 		    this.data('label', world.text(nx, ny, node.label))
+		    //layout()
+		    forceLayout.eachNode(function(n, p) {
+		    	if (n.data._id != that.data('id')) return
+		    	p.p.x = nx / magicNumber
+		    	p.p.y = ny / magicNumber
+		    	p.p.m = 10000
+		    })
+		    renderer.start()
 		}
 		c.drag(move, start)
 		c.data('id', node.id)
@@ -108,8 +116,6 @@ var graph = new (function() {
 		var label = world.text(node.x, node.y, node.label)
 		c.data('label', label)
 		circles.push(c)
-	
-		return this
 	}
 
 	this.addEdge = function(edge) {
@@ -119,7 +125,7 @@ var graph = new (function() {
 		return this	
 	}
 
-	this.renderEdge = function(edge) {
+	var renderEdge = function(edge) {
 		var a = nodes.filter(function(n) { return n.id == edge.endpointA })[0]
 		var b = nodes.filter(function(n) { return n.id == edge.endpointB })[0]
 		var pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')
@@ -136,16 +142,52 @@ var graph = new (function() {
 		// update references in the nodes
 		nodes.filter(function(n) { return n.id == edge.endpointA })[0].connectedEdges.push(edge)
 		nodes.filter(function(n) { return n.id == edge.endpointB })[0].connectedEdges.push(edge)
+	}
 
+	var render = function() {
+		world.clear()
+		circles.length = 0
+		lines.length = 0
+		edges.forEach(renderEdge)
+		nodes.forEach(renderNode)
+	}
+	this.go = function() {
+		render()
+		layout()
 		return this
 	}
 
-	this.render = function() {
-		world.clear()
-		edges.forEach(this.renderEdge)
-		nodes.forEach(this.renderNode)
+	var graph = null, forceLayout = null, renderer = null, magicNumber = 100
+	var layout = function() {
+		graph = new Graph(), map = { }
+		for (var i = 0; i < nodes.length; i = i + 1) {
+            var addedNode = graph.newNode({ label: nodes[i].id, _id: nodes[i].id })
+            console.dir(addedNode)
+            map[nodes[i].id] = addedNode
+        }
 
-		return this
+        for (var i = 0; i < edges.length; i = i + 1) {
+            var node1 = map[edges[i].endpointA]
+            var node2 = map[edges[i].endpointB]
+
+            if (node1.id != node2.id) {
+                graph.newEdge(node1, node2, { _id: edges[i].id })
+            }
+        }
+
+        forceLayout = new Layout.ForceDirected(graph, 800.0, 100.0, 0.1);
+        var that = this
+        var drawNode = function (node, p) {
+            var id = node.data._id
+            //console.dir(p.x + ',' + p.y)
+            circles.filter(function(c) { return c.data('id') == id })[0].attr({ cx: p.x * magicNumber, cy: p.y * magicNumber})
+            var node = nodes.filter(function(n) { return n.id == id })[0]
+            node.x = p.x * magicNumber
+            node.y = p.y * magicNumber
+        }
+
+        renderer = new Renderer(13, forceLayout, render, function(){}, drawNode)
+        renderer.start()
 	}
 
 })()
