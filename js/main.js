@@ -4,18 +4,14 @@ var graph = new (function() {
 	
 	var config = {
 		nodeRadius: 30,
-		nodeColor: '#eee',
-		nodeStrokeColor: '#13f',
+		nodeColor: '#ddd',
+		nodeStrokeColor: 'rgb(62,22,220)',
 		nodeStrokeWidth: '5',
 		edgeStrokeColor: '#222',
 		edgeStrokeWidth: '3'
 	}
 
 	var viewBoxHeight, viewBoxWidth, viewBox, zoomX = 1, zoomY = 1, _width, _height, continousLayout = false
-
-	function handle(delta) {
-		
-	}
 
 	this.initialize = function(options) {
 		if (!options.container) {
@@ -100,15 +96,13 @@ var graph = new (function() {
 				var pos = 'M' + nx + ',' + ny + 'L' + myOtherCircle.attrs.cx + ',' + myOtherCircle.attrs.cy
 		    	$(myPath.node).attr('d', pos)
 		    })
-		    this.data('label').remove()
-		    this.data('label', world.text(nx, ny, node.label))
-		    
+		    this.data('label').attr({'x': nx, 'y': ny})
 		    if (continousLayout) {
 			    forceLayout.eachNode(function(n, p) {
 			    	if (n.data._id != that.data('id')) return
 			    	p.p.x = nx / magicNumber
 			    	p.p.y = ny / magicNumber
-			    	p.p.m = 10000
+			    	p.p.m = 100000
 			    })
 			    renderer.start()
 			}
@@ -155,6 +149,7 @@ var graph = new (function() {
 		edges.forEach(renderEdge)
 		nodes.forEach(renderNode)
 	}
+
 	this.go = function() {
 		render()
 		layout()
@@ -172,34 +167,24 @@ var graph = new (function() {
         for (var i = 0; i < edges.length; i = i + 1) {
             var node1 = map[edges[i].endpointA]
             var node2 = map[edges[i].endpointB]
-
             if (node1.id != node2.id) {
                 graph.newEdge(node1, node2, { _id: edges[i].id })
             }
         }
 
-        forceLayout = new Layout.ForceDirected(graph, 100.0, 300.0, 0.3);
+        forceLayout = new Layout.ForceDirected(graph, 400.0, 400.0, 0.3);
         var that = this
-
-        toScreen = function(p) {
-        	var currentBB = forceLayout.getBoundingBox();
-			var size = currentBB.topright.subtract(currentBB.bottomleft);
-			var sx = p.subtract(currentBB.bottomleft).divide(size.x).x * _width * 2;
-			var sy = p.subtract(currentBB.bottomleft).divide(size.y).y * _height * 2;
-			return new Vector(sx, sy);
-		};
 
         var drawNode = function (node, p) {
             var id = node.data._id
             circles.filter(function(c) { return c.data('id') == id })[0].attr({ cx: p.x * magicNumber, cy: p.y * magicNumber})
             var node = nodes.filter(function(n) { return n.id == id })[0]
-			//p = toScreen(p)
 
             node.x = p.x * magicNumber
             node.y = p.y * magicNumber
         }
 
-        renderer = new Renderer(13, forceLayout, render, function(){}, drawNode)
+        renderer = new Renderer(3, forceLayout, render, function(){}, drawNode)
         renderer.start()
 	}
 

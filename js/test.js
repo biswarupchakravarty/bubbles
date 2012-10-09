@@ -3,7 +3,8 @@ $(function() {
 		width: $(window).innerWidth(),
 		height: $(window).innerHeight(),
 		container: '#holder',
-		backgroundColor: 'red'
+		backgroundColor: 'red',
+		alive: true
 	}).addNode({
 		id: 1,
 		x: 100,
@@ -27,7 +28,7 @@ $(function() {
 		endpointB: 3
 	})
 
-	for (var x = 30 ; x < 40; x = x + 1) {
+	for (var x = 30 ; x < 35; x = x + 1) {
 		graph.addNode({
 			id: x,
 			x: 200,
