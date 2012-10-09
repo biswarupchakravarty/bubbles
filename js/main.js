@@ -3,7 +3,7 @@ var graph = new (function() {
 	var world = null, nodes = [], edges = [], circles = [], lines = [], labels = []
 	
 	var config = {
-		nodeRadius: 30,
+		nodeRadius: 50,
 		nodeColor: '#ddd',
 		nodeStrokeColor: 'rgb(62,22,220)',
 		nodeStrokeWidth: '5',
@@ -108,8 +108,17 @@ var graph = new (function() {
 			}
 		}
 		c.drag(move, start)
+		c.click(function() {
+			this.data('selected', !this.data('selected'))
+			if (this.data('selected'))
+				this.attr({'r': config.nodeRadius * 2})
+			else 
+				this.attr({'r': config.nodeRadius })
+			console.log('toggled')
+		})
 		c.data('id', node.id)
 		c.data('edges', [])
+		c.data('selected', false)
 
 		var label = world.text(node.x, node.y, node.label)
 		c.data('label', label)
@@ -156,7 +165,7 @@ var graph = new (function() {
 		return this
 	}
 
-	var graph = null, forceLayout = null, renderer = null, magicNumber = 50
+	var graph = null, forceLayout = null, renderer = null, magicNumber = 75
 	var layout = function() {
 		graph = new Graph(), map = { }
 		for (var i = 0; i < nodes.length; i = i + 1) {
