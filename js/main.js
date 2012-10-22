@@ -83,8 +83,11 @@ var graph = new (function() {
 		var start = function () {
 		    this._x = this.attr("cx")
 		    this._y = this.attr("cy")
+		    this.data('clicked', true)
+		    this.data('moved', false)
 		},
 		move = function (dx, dy) {
+			this.data('moved', true)
 		    var nx = this._x + (dx / zoomX), ny = this._y + (dy / zoomY)
 		    this.attr({ cx: nx, cy: ny })
 		    var that = this
@@ -102,19 +105,43 @@ var graph = new (function() {
 			    	if (n.data._id != that.data('id')) return
 			    	p.p.x = nx / magicNumber
 			    	p.p.y = ny / magicNumber
-			    	p.p.m = 100000
+			    	//p.p.m = 100000
 			    })
 			    renderer.start()
 			}
+		},
+		end = function() {
+			this.data('moved', false)
 		}
-		c.drag(move, start)
-		c.click(function() {
-			this.data('selected', !this.data('selected'))
-			if (this.data('selected'))
-				this.attr({'r': config.nodeRadius * 2})
-			else 
-				this.attr({'r': config.nodeRadius })
-			console.log('toggled')
+		var _move = function() {
+			var args = arguments
+			setTimeout(function() {
+				move.apply(c, args)
+			}, 0)
+		}
+		if (window.requestAnimationFrame) {
+			_move = function() {
+				var args = arguments
+				requestAnimationFrame(function() {
+					move.apply(c, args)
+				})
+			}
+		}
+		_move = _.throttle(move, 10)
+		c.drag(_move, start)
+		var _mouseMoved = false
+		c.mousedown(function() { 
+			_mouseMoved = false 
+		}).mousemove(function() {
+			_mouseMoved = true
+		}).mouseup(function() {
+			if (_mouseMoved == false) {
+				this.data('selected', !this.data('selected'))
+				if (this.data('selected'))
+					this.attr({'r': config.nodeRadius * 2})
+				else 
+					this.attr({'r': config.nodeRadius })
+			}
 		})
 		c.data('id', node.id)
 		c.data('edges', [])
@@ -193,7 +220,8 @@ var graph = new (function() {
             node.y = p.y * magicNumber
         }
 
-        renderer = new Renderer(3, forceLayout, render, function(){}, drawNode)
+        renderer = new Renderer(100, forceLayout, render, function(){}, drawNode)
+        window.renderer = renderer
         renderer.start()
 	}
 
