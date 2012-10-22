@@ -4,7 +4,7 @@ $(function() {
 		height: $(window).innerHeight(),
 		container: '#holder',
 		backgroundColor: 'red',
-		alive: true
+		alive: false
 	}).addNode({
 		id: 1,
 		x: 100,

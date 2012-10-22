@@ -9,6 +9,8 @@ var graph = new (function() {
 		nodeStrokeWidth: '10',
 		nodeSelectedFillStyle: 'rgb(94,212,255)',
 		nodeSelectedStrokeColor: 'rgb(0,176,240)',
+		nodeConnectedFillStyle: 'rgb(255,204,0)',
+		nodeConnectedStrokeColor: 'rgb(255,174,0)',
 		edgeStrokeColor: 'rgb(150,150,150)',
 		edgeStrokeWidth: '3'
 	}
@@ -89,6 +91,7 @@ var graph = new (function() {
 		    this.data('moved', false)
 		},
 		move = function (dx, dy) {
+			console.log('dx: ' + dx)
 			this.data('moved', true)
 		    var nx = this._x + (dx / zoomX), ny = this._y + (dy / zoomY)
 		    this.attr({ cx: nx, cy: ny })
@@ -134,9 +137,33 @@ var graph = new (function() {
 		}).mousemove(function() {
 			_mouseMoved = true
 		}).mouseup(function() {
+
+			// only is a circle has just been clicked
 			if (_mouseMoved == false) {
+
 				this.data('selected', !this.data('selected'))
-				var finalAttributes = { }
+				var that = this, myNode = nodes.filter(function(n) { return n.id == that.data('id') })[0]
+
+				// reset all circles to initial state
+				circles.forEach(function(c) {
+					if (c.data('id') == that.data('id')) return
+					c.attr({
+						'r': config.nodeRadius,
+						fill: config.nodeColor,
+						stroke: config.nodeStrokeColor
+					})
+				})
+
+				var connectedIds = myNode.connectedEdges.map(function(edge) {
+					var otherNode = null
+					if (edge.endpointA == myNode.id) {
+						otherNode = nodes.filter(function(n) { return n.id == edge.endpointB })[0]
+					} else {
+						otherNode = nodes.filter(function(n) { return n.id == edge.endpointA })[0]
+					}
+					return otherNode.id
+				})
+				var finalAttributes, neighborAttributes
 				if (this.data('selected')) {
 					finalAttributes = {
 						'r': config.nodeRadius * 2,
@@ -145,13 +172,26 @@ var graph = new (function() {
 					}
 				}
 				else { 
-					finalAttributes = { 
+				finalAttributes = { 
 						'r': config.nodeRadius,
 						fill: config.nodeColor,
 						stroke: config.nodeStrokeColor
 					}
 				}
 				this.animate(finalAttributes, 450, 'bounce')
+
+				// if it has been de-selected, skip
+				// else, colors its neighbours
+				if (this.data('selected') == false) return
+				connectedIds.forEach(function(connectedId) {
+					var neighbor = circles.filter(function(c) {
+						return c.data('id') == connectedId
+					})[0]
+					neighbor.attr({
+						fill: config.nodeConnectedFillStyle,
+						stroke: config.nodeConnectedStrokeColor
+					})
+				})
 			}
 		})
 		c.data('id', node.id)
@@ -231,7 +271,7 @@ var graph = new (function() {
             node.y = p.y * magicNumber
         }
 
-        renderer = new Renderer(100, forceLayout, render, function(){}, drawNode)
+        renderer = new Renderer(3, forceLayout, render, function(){}, drawNode)
         window.renderer = renderer
         renderer.start()
 	}
