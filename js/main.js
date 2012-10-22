@@ -151,7 +151,7 @@ var graph = new (function() {
 						fill: config.nodeColor,
 						stroke: config.nodeStrokeColor
 					})
-				c.data('selected', false)
+					c.data('selected', false)
 				})
 
 				var connectedIds = myNode.connectedEdges.map(function(edge) {
@@ -163,7 +163,7 @@ var graph = new (function() {
 					}
 					return otherNode.id
 				})
-				var finalAttributes, neighborAttributes
+				var finalAttributes
 				if (this.data('selected')) {
 					finalAttributes = {
 						'r': config.nodeRadius * 2,
@@ -172,7 +172,7 @@ var graph = new (function() {
 					}
 				}
 				else { 
-				finalAttributes = { 
+					finalAttributes = { 
 						'r': config.nodeRadius,
 						fill: config.nodeColor,
 						stroke: config.nodeStrokeColor
@@ -194,7 +194,7 @@ var graph = new (function() {
 						}, 0)
 					})
 				}
-				
+
 				this.animate(finalAttributes, 450, 'bounce')
 			}
 		})
@@ -229,8 +229,27 @@ var graph = new (function() {
 		lines.push(l)
 
 		// update references in the nodes
-		nodes.filter(function(n) { return n.id == edge.endpointA })[0].connectedEdges.push(edge)
-		nodes.filter(function(n) { return n.id == edge.endpointB })[0].connectedEdges.push(edge)
+		a.connectedEdges.push(edge)
+		b.connectedEdges.push(edge)
+		var unique = []
+		a.connectedEdges.forEach(function(cEdge) {
+			if (unique.filter(function(uEdge) {
+				return uEdge.id == cEdge.id
+			}).length > 0) return
+			unique.push(cEdge)
+		})
+		a.connectedEdges = unique
+		unique.length = 0
+		b.connectedEdges.forEach(function(cEdge) {
+			if (unique.filter(function(uEdge) {
+				return uEdge.id == cEdge.id
+			}).length > 0) return
+			unique.push(cEdge)
+		})
+		b.connectedEdges = unique
+		delete(unique)
+		//console.log(edge.id + ':' + a.connectedEdges.length + ', ' + unique.length)
+		//a.connectedEdges = _.uniq(a.connectedEdges)
 	}
 
 	var render = function() {
