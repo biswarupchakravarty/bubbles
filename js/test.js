@@ -6,30 +6,33 @@ $(function() {
 		backgroundColor: 'red',
 		alive: true
 	}).addNode({
-		id: 1,
+		id: 100,
 		label: 'Mia'
 	}).addNode({
-		id: 2,
+		id: 200,
 		label: 'Baccha'
 	}).addNode({
-		id: 3,
+		id: 300,
 		label: 'Bibi'
 	}).addEdge({
-		endpointA: 1,
-		endpointB: 2
+		endpointA: 100,
+		endpointB: 200
 	}).addEdge({
-		endpointA: 2,
-		endpointB: 3
+		endpointA: 200,
+		endpointB: 300
 	})
 
-	for (var x = 30; x < 35; x = x + 1) {
+	var labels = ['Jack','Jill','Mark','Dinosaur','Barfi','Chocolate Milkshake','Yellow','LotR',':D','Ram','Krishna','Profits','Loss','Sadness','Towel','Pink!','CradleOfFilth']
+	for (var x = 1; x < labels.length; x = x + 1) {
 		graph.addNode({
 			id: x,
-			x: 200,
-			y: 200,
-			label: 'Node #' + x
-		}).addEdge({
-			endpointA: 1,
+			label: labels[x]
+		})
+	}
+
+	for (var x = 1; x < labels.length - 1; x = x + 1) {
+		graph.addEdge({
+			endpointA: parseInt(Math.random() * labels.length - 3) + 1,
 			endpointB: x
 		})
 	}

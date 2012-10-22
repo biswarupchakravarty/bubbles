@@ -26,6 +26,11 @@ var graph = new (function() {
 		viewBoxHeight = options.height
 		viewBoxWidth = options.width
 		world = Raphael($(options.container).get(0), options.width, options.height)
+
+		// boot up the gpu
+		gpu.setWorld(world)
+		gpu.setZoom(1, 1)
+
 		viewBox = world.setViewBox(0, 0, viewBoxWidth, viewBoxHeight)
 		viewBox.X = 0
 		viewBox.Y = 0
@@ -42,6 +47,8 @@ var graph = new (function() {
 			if (e.target.nodeName == 'svg') {
 				down = false
 			}
+		}).mouseleave(function() {
+			down = false
 		}).mousemove(function (e) {
 			if (down != true || e.target.nodeName != 'svg') return
 			var xDiff = (e.screenX - _x) / zoomX, yDiff = (e.screenY - _y) / zoomY
@@ -66,6 +73,7 @@ var graph = new (function() {
 			world.setViewBox(viewBox.X,viewBox.Y,viewBoxWidth,viewBoxHeight)
 			zoomX = options.width / viewBoxWidth
 			zoomY = options.height / viewBoxHeight
+			gpu.setZoom(zoomX, zoomY)
 		})
 		return this
 	}
@@ -75,136 +83,6 @@ var graph = new (function() {
 		node.connectedEdges = []
 		nodes.push(node)
 		return this
-	}
-
-	var renderNode = function(node) {
-		var c = world.circle(node.x, node.y, config.nodeRadius)
-			.attr({
-				fill: config.nodeColor,
-				stroke: config.nodeStrokeColor,
-				'stroke-width': config.nodeStrokeWidth
-			})
-		var start = function () {
-		    this._x = this.attr("cx")
-		    this._y = this.attr("cy")
-		    this.data('clicked', true)
-		    this.data('moved', false)
-		},
-		move = function (dx, dy) {
-			this.data('moved', true)
-		    var nx = this._x + (dx / zoomX), ny = this._y + (dy / zoomY)
-		    this.attr({ cx: nx, cy: ny })
-		    var that = this
-		    var myNode = nodes.filter(function(n) { return n.id == that.data('id') })[0]
-		    myNode.connectedEdges.forEach(function(edge) {
-		    	var myPath = lines.filter(function(l) { return l.data('id') == edge.id })[0]
-		    	var myOtherCircleId = myPath.data('endpointA') == that.data('id') ? myPath.data('endpointB') : myPath.data('endpointA')
-		    	var myOtherCircle = circles.filter(function(c) { return c.data('id') == myOtherCircleId })[0]
-				var pos = 'M' + nx + ',' + ny + 'L' + myOtherCircle.attrs.cx + ',' + myOtherCircle.attrs.cy
-		    	$(myPath.node).attr('d', pos)
-		    })
-		    this.data('label').attr({'x': nx, 'y': ny})
-		    if (continousLayout) {
-			    forceLayout.eachNode(function(n, p) {
-			    	if (n.data._id != that.data('id')) return
-			    	p.p.x = nx / magicNumber
-			    	p.p.y = ny / magicNumber
-			    	//p.p.m = 100000
-			    })
-			    renderer.start()
-			}
-		}
-		var _move = function() {
-			var args = arguments
-			setTimeout(function() {
-				move.apply(c, args)
-			}, 0)
-		}
-		if (window.requestAnimationFrame) {
-			_move = function() {
-				var args = arguments
-				requestAnimationFrame(function() {
-					move.apply(c, args)
-				})
-			}
-		}
-		_move = _.throttle(move, 10)
-		c.drag(_move, start)
-		var _mouseMoved = false
-		c.mousedown(function() { 
-			_mouseMoved = false 
-		}).mousemove(function() {
-			_mouseMoved = true
-		}).mouseup(function() {
-
-			// only is a circle has just been clicked
-			if (_mouseMoved == false) {
-
-				this.data('selected', !this.data('selected'))
-				var that = this, myNode = nodes.filter(function(n) { return n.id == that.data('id') })[0]
-
-				// reset all circles to initial state
-				circles.forEach(function(c) {
-					if (c.data('id') == that.data('id')) return
-					c.attr({
-						'r': config.nodeRadius,
-						fill: config.nodeColor,
-						stroke: config.nodeStrokeColor
-					})
-					c.data('selected', false)
-				})
-
-				var connectedIds = myNode.connectedEdges.map(function(edge) {
-					var otherNode = null
-					if (edge.endpointA == myNode.id) {
-						otherNode = nodes.filter(function(n) { return n.id == edge.endpointB })[0]
-					} else {
-						otherNode = nodes.filter(function(n) { return n.id == edge.endpointA })[0]
-					}
-					return otherNode.id
-				})
-				var finalAttributes
-				if (this.data('selected')) {
-					finalAttributes = {
-						'r': config.nodeRadius * 2,
-						fill: config.nodeSelectedFillStyle,
-						stroke: config.nodeSelectedStrokeColor
-					}
-				}
-				else { 
-					finalAttributes = { 
-						'r': config.nodeRadius,
-						fill: config.nodeColor,
-						stroke: config.nodeStrokeColor
-					}
-				}
-
-				// if it has been de-selected, skip
-				// else, colors its neighbours
-				if (this.data('selected') == true) {
-					connectedIds.forEach(function(connectedId) {
-						var neighbor = circles.filter(function(c) {
-							return c.data('id') == connectedId
-						})[0]
-						setTimeout(function() {
-							neighbor.attr({
-								fill: config.nodeConnectedFillStyle,
-								stroke: config.nodeConnectedStrokeColor
-							})
-						}, 0)
-					})
-				}
-
-				this.animate(finalAttributes, 450, 'bounce')
-			}
-		})
-		c.data('id', node.id)
-		c.data('edges', [])
-		c.data('selected', false)
-
-		var label = world.text(node.x, node.y, node.label)
-		c.data('label', label)
-		circles.push(c)
 	}
 
 	this.addEdge = function(edge) {
@@ -217,6 +95,13 @@ var graph = new (function() {
 	var renderEdge = function(edge) {
 		var a = nodes.filter(function(n) { return n.id == edge.endpointA })[0]
 		var b = nodes.filter(function(n) { return n.id == edge.endpointB })[0]
+
+		var _e = gpu.getLineById(edge.id)
+		var pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')		
+		$(_e.node).attr('d', pathCommands)
+
+		return
+
 		var pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')
 		var l = world.path(pathCommands)
 			.attr({
@@ -253,14 +138,22 @@ var graph = new (function() {
 	}
 
 	var render = function() {
-		world.clear()
-		circles.length = 0
-		lines.length = 0
 		edges.forEach(renderEdge)
-		nodes.forEach(renderNode)
+	}
+
+	this.dump = function() {
+		console.dir(circles)
+		console.dir(lines)
+		console.dir(edges)
+		console.dir(nodes)
 	}
 
 	this.go = function() {
+
+		// boot up the gpu
+		nodes.forEach(gpu.addCircle)
+		edges.forEach(gpu.addLine)
+
 		render()
 		layout()
 		return this
@@ -283,18 +176,22 @@ var graph = new (function() {
         }
 
         forceLayout = new Layout.ForceDirected(graph, 400.0, 400.0, 0.3);
+        gpu.setForceLayout(forceLayout)
         var that = this
 
         var drawNode = function (node, p) {
             var id = node.data._id
-            circles.filter(function(c) { return c.data('id') == id })[0].attr({ cx: p.x * magicNumber, cy: p.y * magicNumber})
+
+            gpu.getCircleById(id).attr({ cx: p.x * magicNumber, cy: p.y * magicNumber})
+            gpu.getCircleById(id).data('label').attr({ x: p.x * magicNumber, y: p.y * magicNumber})
+            //circles.filter(function(c) { return c.data('id') == id })[0].attr({ cx: p.x * magicNumber, cy: p.y * magicNumber})
             var node = nodes.filter(function(n) { return n.id == id })[0]
 
             node.x = p.x * magicNumber
             node.y = p.y * magicNumber
         }
 
-        renderer = new Renderer(3, forceLayout, render, function(){}, drawNode)
+        renderer = new Renderer(100, forceLayout, render, function(){}, drawNode)
         window.renderer = renderer
         renderer.start()
 	}
