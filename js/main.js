@@ -91,7 +91,6 @@ var graph = new (function() {
 		    this.data('moved', false)
 		},
 		move = function (dx, dy) {
-			console.log('dx: ' + dx)
 			this.data('moved', true)
 		    var nx = this._x + (dx / zoomX), ny = this._y + (dy / zoomY)
 		    this.attr({ cx: nx, cy: ny })
@@ -152,6 +151,7 @@ var graph = new (function() {
 						fill: config.nodeColor,
 						stroke: config.nodeStrokeColor
 					})
+				c.data('selected', false)
 				})
 
 				var connectedIds = myNode.connectedEdges.map(function(edge) {
@@ -178,20 +178,24 @@ var graph = new (function() {
 						stroke: config.nodeStrokeColor
 					}
 				}
-				this.animate(finalAttributes, 450, 'bounce')
 
 				// if it has been de-selected, skip
 				// else, colors its neighbours
-				if (this.data('selected') == false) return
-				connectedIds.forEach(function(connectedId) {
-					var neighbor = circles.filter(function(c) {
-						return c.data('id') == connectedId
-					})[0]
-					neighbor.attr({
-						fill: config.nodeConnectedFillStyle,
-						stroke: config.nodeConnectedStrokeColor
+				if (this.data('selected') == true) {
+					connectedIds.forEach(function(connectedId) {
+						var neighbor = circles.filter(function(c) {
+							return c.data('id') == connectedId
+						})[0]
+						setTimeout(function() {
+							neighbor.attr({
+								fill: config.nodeConnectedFillStyle,
+								stroke: config.nodeConnectedStrokeColor
+							})
+						}, 0)
 					})
-				})
+				}
+				
+				this.animate(finalAttributes, 450, 'bounce')
 			}
 		})
 		c.data('id', node.id)
