@@ -25,15 +25,15 @@ $(function() {
 	var labels = ['Jack','Jill','Mark','Dinosaur','Barfi','Chocolate Milkshake','Yellow','LotR',':D','Ram','Krishna','Profits','Loss','Sadness','Towel','Pink!','CradleOfFilth']
 	for (var x = 1; x < labels.length; x = x + 1) {
 		graph.addNode({
-			id: x,
+			id: x - 1,
 			label: labels[x]
 		})
 	}
 
-	for (var x = 1; x < labels.length - 1; x = x + 1) {
+	for (var x = 1; x < labels.length - 2; x = x + 1) {
 		graph.addEdge({
-			endpointA: parseInt(Math.random() * labels.length - 3) + 1,
-			endpointB: x
+			endpointA: parseInt(Math.random() * (labels.length - 2)) + 1,
+			endpointB: parseInt(Math.random() * (labels.length - 2)) + 1
 		})
 	}
 

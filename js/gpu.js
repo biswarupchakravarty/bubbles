@@ -23,7 +23,8 @@ var gpu = new (function() {
 	var defaultCircleAttributes = {
 		fill: config.nodeColor,
 		stroke: config.nodeStrokeColor,
-		'stroke-width': config.nodeStrokeWidth
+		'stroke-width': config.nodeStrokeWidth,
+		r: config.nodeRadius
 	}
 
 	var defaultLineAttributes = {
@@ -63,7 +64,9 @@ var gpu = new (function() {
 		world = w
 	}
 
-	this.setZoom = function(x, y) { zoomX = x, zoomY = y }
+	this.setZoom = function(x, y) { 
+		zoomX = x, zoomY = y
+	}
 	this.setForceLayout = function(l) { forceLayout = l }
 
 	this.addCircle = function(node) {
@@ -124,11 +127,7 @@ var gpu = new (function() {
 				// reset all circles to initial state
 				circles.forEach(function(c) {
 					if (c.data('id') == that.data('id')) return
-					c.attr({
-						'r': config.nodeRadius,
-						fill: config.nodeColor,
-						stroke: config.nodeStrokeColor
-					})
+					c.attr(defaultCircleAttributes)
 					c.data('selected', false)
 				})
 

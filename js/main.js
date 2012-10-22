@@ -2,19 +2,6 @@ var graph = new (function() {
 
 	var world = null, nodes = [], edges = [], circles = [], lines = [], labels = []
 	
-	var config = {
-		nodeRadius: 50,
-		nodeColor: '#fff',
-		nodeStrokeColor: 'rgb(220,220,220)',
-		nodeStrokeWidth: '10',
-		nodeSelectedFillStyle: 'rgb(94,212,255)',
-		nodeSelectedStrokeColor: 'rgb(0,176,240)',
-		nodeConnectedFillStyle: 'rgb(255,204,0)',
-		nodeConnectedStrokeColor: 'rgb(255,174,0)',
-		edgeStrokeColor: 'rgb(150,150,150)',
-		edgeStrokeWidth: '3'
-	}
-
 	var viewBoxHeight, viewBoxWidth, viewBox, zoomX = 1, zoomY = 1, _width, _height, continousLayout = false
 
 	this.initialize = function(options) {
@@ -99,42 +86,6 @@ var graph = new (function() {
 		var _e = gpu.getLineById(edge.id)
 		var pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')		
 		$(_e.node).attr('d', pathCommands)
-
-		return
-
-		var pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')
-		var l = world.path(pathCommands)
-			.attr({
-				stroke: config.edgeStrokeColor,
-				'stroke-width': config.edgeStrokeWidth
-			})
-			.data('id', edge.id)
-			.data('endpointB', edge.endpointB)
-			.data('endpointA', edge.endpointA)
-		lines.push(l)
-
-		// update references in the nodes
-		a.connectedEdges.push(edge)
-		b.connectedEdges.push(edge)
-		var unique = []
-		a.connectedEdges.forEach(function(cEdge) {
-			if (unique.filter(function(uEdge) {
-				return uEdge.id == cEdge.id
-			}).length > 0) return
-			unique.push(cEdge)
-		})
-		a.connectedEdges = unique
-		unique.length = 0
-		b.connectedEdges.forEach(function(cEdge) {
-			if (unique.filter(function(uEdge) {
-				return uEdge.id == cEdge.id
-			}).length > 0) return
-			unique.push(cEdge)
-		})
-		b.connectedEdges = unique
-		delete(unique)
-		//console.log(edge.id + ':' + a.connectedEdges.length + ', ' + unique.length)
-		//a.connectedEdges = _.uniq(a.connectedEdges)
 	}
 
 	var render = function() {
