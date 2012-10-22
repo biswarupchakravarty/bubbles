@@ -4,10 +4,12 @@ var graph = new (function() {
 	
 	var config = {
 		nodeRadius: 50,
-		nodeColor: '#ddd',
-		nodeStrokeColor: 'rgb(62,22,220)',
-		nodeStrokeWidth: '5',
-		edgeStrokeColor: '#222',
+		nodeColor: '#fff',
+		nodeStrokeColor: 'rgb(220,220,220)',
+		nodeStrokeWidth: '10',
+		nodeSelectedFillStyle: 'rgb(94,212,255)',
+		nodeSelectedStrokeColor: 'rgb(0,176,240)',
+		edgeStrokeColor: 'rgb(150,150,150)',
 		edgeStrokeWidth: '3'
 	}
 
@@ -27,7 +29,7 @@ var graph = new (function() {
 		viewBox.Y = 0
 		var down = false, _x = 0, _y = 0
 		continousLayout = options.alive
-
+		$(options.container).css('background', 'url(http://subtlepatterns.subtlepatterns.netdna-cdn.com/patterns/textured_stripes.png)')
 		$(options.container).mousedown(function (e) {
 			if (e.target.nodeName == 'svg') {
 				down = true
@@ -109,9 +111,6 @@ var graph = new (function() {
 			    })
 			    renderer.start()
 			}
-		},
-		end = function() {
-			this.data('moved', false)
 		}
 		var _move = function() {
 			var args = arguments
@@ -137,10 +136,22 @@ var graph = new (function() {
 		}).mouseup(function() {
 			if (_mouseMoved == false) {
 				this.data('selected', !this.data('selected'))
-				if (this.data('selected'))
-					this.attr({'r': config.nodeRadius * 2})
-				else 
-					this.attr({'r': config.nodeRadius })
+				var finalAttributes = { }
+				if (this.data('selected')) {
+					finalAttributes = {
+						'r': config.nodeRadius * 2,
+						fill: config.nodeSelectedFillStyle,
+						stroke: config.nodeSelectedStrokeColor
+					}
+				}
+				else { 
+					finalAttributes = { 
+						'r': config.nodeRadius,
+						fill: config.nodeColor,
+						stroke: config.nodeStrokeColor
+					}
+				}
+				this.animate(finalAttributes, 450, 'bounce')
 			}
 		})
 		c.data('id', node.id)
