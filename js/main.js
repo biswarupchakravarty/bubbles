@@ -12,9 +12,11 @@ var graph = new (function() {
 		_width = options.width, _height = options.height
 		viewBoxHeight = options.height
 		viewBoxWidth = options.width
+		$(options.container).empty()
 		world = Raphael($(options.container).get(0), options.width, options.height)
 
 		// boot up the gpu
+		gpu.boot()
 		gpu.setWorld(world)
 		gpu.setZoom(1, 1)
 

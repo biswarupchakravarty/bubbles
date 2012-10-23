@@ -6,6 +6,13 @@ var gpu = new (function() {
 	var forceLayout
 	var connections = { }
 
+	this.boot = function() {
+		connections = { }
+		zoomX = zoomY = 1
+		circles.length = 0
+		lines.length = 0
+	}
+
 	// default configuration
 	var config = {
 		nodeRadius: 50,
