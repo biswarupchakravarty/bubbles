@@ -99,11 +99,11 @@ var gpu = new (function() {
 		    	if (n.data._id != that.data('id')) return
 		    	p.p.x = nx / 75
 		    	p.p.y = ny / 75
-		    	p.p.m = 100000
+		    	p.p.m = 1000000
 		    })
 		    renderer.start()
 		}
-		c.drag(_.throttle(onDragMove, 10), onDragStart)
+		c.drag(onDragMove, onDragStart)
 		c.data('label').mousedown(function() {
 			c.mousedown.apply(c, arguments)
 		})

@@ -22,7 +22,7 @@ $(function() {
 		endpointB: 300
 	})
 
-	var labels = ['Jack','Jill','Mark','Dinosaur','Barfi','Chocolate Milkshake','Yellow','LotR',':D','Ram','Krishna','Profits','Loss','Sadness','Towel','Pink!','CradleOfFilth']
+	var labels = ['Jack','Jill','Mark','Dinosaur','Barfi','Chocolate Milkshake','Yellow','LotR',':D','Ram','Krishna','Profits','Loss','Sadness','Towel','Pink!','CradleOfFilth','Bombay','se','Baroda','Tak']
 	for (var x = 1; x < labels.length; x = x + 1) {
 		graph.addNode({
 			id: x - 1,

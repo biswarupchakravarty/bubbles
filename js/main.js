@@ -142,7 +142,7 @@ var graph = new (function() {
             node.y = p.y * magicNumber
         }
 
-        renderer = new Renderer(100, forceLayout, render, function(){}, drawNode)
+        renderer = new Renderer(10, forceLayout, render, function(){}, drawNode)
         window.renderer = renderer
         renderer.start()
 	}
