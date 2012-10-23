@@ -38,6 +38,17 @@ var gpu = new (function() {
 		})[0]
 	}
 
+	var linesToSelf = function(id) {
+		var result = []
+		lines.forEach(function (line) {
+			if (line.data('endpointa') == line.data('endpointb') && line.data('endpointb') == id)
+				result.push(line.data('id'))
+		})
+		return result
+	}
+
+	this.linesToSelf = linesToSelf
+
 	var lineById = function(id) {
 		return lines.filter(function (l) {
 			return l.data('id') == id
@@ -104,9 +115,7 @@ var gpu = new (function() {
 		    renderer.start()
 		}
 		c.drag(onDragMove, onDragStart)
-		c.data('label').mousedown(function() {
-			c.mousedown.apply(c, arguments)
-		})
+
 		var _mouseMoved = false, _mouseDown = false
 		c.mousedown(function() { 
 			_mouseMoved = false
@@ -131,17 +140,6 @@ var gpu = new (function() {
 					c.data('selected', false)
 				})
 
-				if (false) {
-					var connectedIds = myNode.connectedEdges.map(function(edge) {
-						var otherNode = null
-						if (edge.endpointA == myNode.id) {
-							otherNode = nodes.filter(function(n) { return n.id == edge.endpointB })[0]
-						} else {
-							otherNode = nodes.filter(function(n) { return n.id == edge.endpointA })[0]
-						}
-						return otherNode.id
-					})
-				}
 				var finalAttributes
 				if (this.data('selected')) {
 					finalAttributes = {
@@ -212,8 +210,8 @@ var gpu = new (function() {
 		var l = world.path(pathCommands).attr(defaultLineAttributes)
 		l.toBack()
 		l.data('id', edge.id)
-		l.data('endpointB', edge.endpointB)
-		l.data('endpointA', edge.endpointA)
+		l.data('endpointb', edge.endpointB)
+		l.data('endpointa', edge.endpointA)
 		lines.push(l)
 
 		// create map of connections 

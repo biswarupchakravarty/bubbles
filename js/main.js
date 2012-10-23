@@ -23,7 +23,7 @@ var graph = new (function() {
 		viewBox.Y = 0
 		var down = false, _x = 0, _y = 0
 		continousLayout = options.alive
-		$(options.container).css('background', 'url(http://subtlepatterns.subtlepatterns.netdna-cdn.com/patterns/textured_stripes.png)')
+		$(options.container).css('background', 'url(http://subtlepatterns.subtlepatterns.netdna-cdn.com/patterns/tiny_grid.png)')
 		$(options.container).mousedown(function (e) {
 			if (e.target.nodeName == 'svg') {
 				down = true
@@ -84,7 +84,24 @@ var graph = new (function() {
 		var b = nodes.filter(function(n) { return n.id == edge.endpointB })[0]
 
 		var _e = gpu.getLineById(edge.id)
-		var pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')		
+		var pathCommands
+		if (edge.endpointB != edge.endpointA) {
+			pathCommands = ['M',a.x,a.y,'L',b.x,b.y].join(' ')
+		}
+		else {
+			// find total self edges from same node
+			// find angle per edge
+			// (sin0, cos0)
+			var _length = 125
+			var node = gpu.getCircleById(edge.endpointB)
+			var selfLines = gpu.linesToSelf(edge.endpointB)
+			var anglePerLine = Math.PI * 2 / selfLines.length
+			var thisEdgeIndex = selfLines.indexOf(edge.id)
+			var angleOffset = anglePerLine * thisEdgeIndex + 0.01
+			var _y = _length * Math.sin(angleOffset), _x = _length * Math.cos(angleOffset)
+			pathCommands = ['M',a.x,a.y,'L',a.x + _x, a.y + _y].join(' ')
+		}
+
 		$(_e.node).attr('d', pathCommands)
 	}
 
