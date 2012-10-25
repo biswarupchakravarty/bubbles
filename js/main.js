@@ -4,6 +4,19 @@ var graph = new (function() {
 	
 	var viewBoxHeight, viewBoxWidth, viewBox, zoomX = 1, zoomY = 1, _width, _height, continousLayout = false
 
+	var config = {
+		nodeRadius: 50,
+		nodeColor: '#fff',
+		nodeStrokeColor: 'rgb(220,220,220)',
+		nodeStrokeWidth: '10',
+		nodeSelectedFillStyle: 'rgb(94,212,255)',
+		nodeSelectedStrokeColor: 'rgb(0,176,240)',
+		nodeConnectedFillStyle: 'rgb(255,204,0)',
+		nodeConnectedStrokeColor: 'rgb(255,174,0)',
+		edgeStrokeColor: 'rgb(150,150,150)',
+		edgeStrokeWidth: '3'
+	}
+
 	this.initialize = function(options) {
 		if (!options.container) {
 			throw new Error('Must provide container selector!')
@@ -63,6 +76,10 @@ var graph = new (function() {
 			zoomX = options.width / viewBoxWidth
 			zoomY = options.height / viewBoxHeight
 			gpu.setZoom(zoomX, zoomY)
+		}).dblclick(function(e) {
+			if (e.target.nodeName == 'svg') {
+
+			}
 		})
 		return this
 	}
@@ -94,14 +111,25 @@ var graph = new (function() {
 			// find total self edges from same node
 			// find angle per edge
 			// (sin0, cos0)
-			var _length = 125
+			var _length = 105
 			var node = gpu.getCircleById(edge.endpointB)
 			var selfLines = gpu.linesToSelf(edge.endpointB)
 			var anglePerLine = Math.PI * 2 / selfLines.length
 			var thisEdgeIndex = selfLines.indexOf(edge.id)
-			var angleOffset = anglePerLine * thisEdgeIndex + 0.01
+			var angleOffset = anglePerLine * thisEdgeIndex + 0.21 - Math.PI/2
 			var _y = _length * Math.sin(angleOffset), _x = _length * Math.cos(angleOffset)
 			pathCommands = ['M',a.x,a.y,'L',a.x + _x, a.y + _y].join(' ')
+			if (_e.data('circle')) {
+				_e.data('circle').attr({cx:  a.x + _x, cy:  a.y + _y})
+			} else {
+				_e.data('circle', world.circle(a.x + _x, a.y + _y, 10).attr({
+						fill: config.nodeStrokeColor,
+						'stroke-width': 0
+					}))
+				console.log(gpu.getCircleById(_e.data('endpointa')).data('name'))
+				if (gpu.getCircleById(_e.data('endpointa')).data('selected') == true)
+					_e.attr({ fill: config.nodeSelectedFillStyle })
+			}
 		}
 
 		$(_e.node).attr('d', pathCommands)
@@ -161,7 +189,7 @@ var graph = new (function() {
             node.y = p.y * magicNumber
         }
 
-        renderer = new Renderer(10, forceLayout, render, function(){}, drawNode)
+        renderer = new Renderer(100, forceLayout, render, function(){}, drawNode)
         window.renderer = renderer
         renderer.start()
 	}

@@ -99,9 +99,9 @@ var gpu = new (function() {
 		c.data('state', defaultCircleAttributes)
 
 		// generate label and store
-		var label = world.text(node.x, node.y, node.label)
+		var label = world.text(node.x, node.y, node.label).attr({ 'font-size': '15pt', 'font-weight':'bold'})
 		c.data('label', label)
-		
+		c.data('name', node.label)
 		var onDragStart = function () {
 		    this._x = this.attr("cx")
 		    this._y = this.attr("cy")

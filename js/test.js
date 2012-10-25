@@ -4,7 +4,7 @@ $(function() {
 		height: $(window).innerHeight(),
 		container: '#holder',
 		backgroundColor: 'red',
-		alive: true
+		alive: false
 	}).addNode({
 		id: 100,
 		label: 'Mia'
@@ -22,18 +22,33 @@ $(function() {
 		endpointB: 300
 	})
 
-	var labels = ['Jack','Jill','Mark','Dinosaur','Barfi','Chocolate Milkshake','Yellow','LotR',':D','Ram','Krishna','Profits','Loss','Sadness','Towel','Pink!','CradleOfFilth','Bombay','se','Baroda','Tak']
-	for (var x = 1; x < labels.length; x = x + 1) {
+	var number = 20
+	var labels = ['Jack','Jill','Mark','Dinosaur','Barfi','Chocolate Milkshake','Yellow','LotR','Appacitive','Ram','Krishna','Profits','Loss','Sadness','Towel','Pink!','CradleOfFilth','Bombay','se','Baroda','Tak']
+	for (var x = 1; x < number; x = x + 1) {
 		graph.addNode({
 			id: x - 1,
-			label: labels[x]
+			label: labels[x % (labels.length - 1)]
 		})
 	}
 
-	for (var x = 1; x < labels.length - 2; x = x + 1) {
+	graph.addEdge({
+		endpointA: 1,
+		endpointB: 1
+	}).addEdge({
+		endpointA: 1,
+		endpointB: 1
+	}).addEdge({
+		endpointA: 1,
+		endpointB: 1
+	}).addEdge({
+		endpointA: 1,
+		endpointB: 1
+	})
+
+	for (var x = 1; x < number - 2; x = x + 1) {
 		graph.addEdge({
-			endpointA: parseInt(Math.random() * (labels.length - 2)) + 1,
-			endpointB: parseInt(Math.random() * (labels.length - 2)) + 1
+			endpointA: parseInt(Math.random() * (number - 2)) + 1,
+			endpointB: parseInt(Math.random() * (number - 2)) + 1
 		})
 	}
 
